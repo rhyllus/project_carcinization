@@ -1,0 +1,80 @@
+[gd_scene load_steps=5 format=3 uid="uid://dymgy3pki746v"]
+
+[ext_resource type="Script" path="res://scripts/player_legacy.gd" id="1_v7hmb"]
+[ext_resource type="Script" path="res://scripts/Camera.gd" id="2_22tr1"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_hx6qm"]
+margin = 0.05
+radius = 1.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_d4e1h"]
+
+[node name="Player" type="Node3D"]
+script = ExtResource("2_22tr1")
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="."]
+script = ExtResource("1_v7hmb")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
+shape = SubResource("SphereShape3D_hx6qm")
+
+[node name="JumpTimer" type="Timer" parent="CharacterBody3D"]
+process_callback = 0
+one_shot = true
+
+[node name="JumpBuffer" type="Timer" parent="CharacterBody3D"]
+one_shot = true
+
+[node name="VelocityVector" type="RayCast3D" parent="CharacterBody3D"]
+target_position = Vector3(0, 0, -3)
+collide_with_bodies = false
+debug_shape_custom_color = Color(0.945098, 0, 0.886275, 1)
+debug_shape_thickness = 5
+
+[node name="VectorTwist" type="Node3D" parent="CharacterBody3D"]
+
+[node name="VectorPitch" type="Node3D" parent="CharacterBody3D/VectorTwist"]
+
+[node name="SlopeCenterD" type="RayCast3D" parent="CharacterBody3D/VectorTwist/VectorPitch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.00014, 0)
+target_position = Vector3(0, -0.3, 0)
+debug_shape_thickness = 5
+
+[node name="SlopeCenterDb" type="RayCast3D" parent="CharacterBody3D/VectorTwist/VectorPitch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, -6)
+target_position = Vector3(0, -0.3, 0)
+debug_shape_thickness = 5
+
+[node name="SlopeBackD" type="RayCast3D" parent="CharacterBody3D/VectorTwist/VectorPitch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+target_position = Vector3(0, -1.2, 0)
+
+[node name="SlopeFrontD" type="RayCast3D" parent="CharacterBody3D/VectorTwist/VectorPitch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+target_position = Vector3(0, -1.2, 0)
+
+[node name="SlopeSideLD" type="RayCast3D" parent="CharacterBody3D/VectorTwist/VectorPitch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0)
+target_position = Vector3(0, -1.2, 0)
+
+[node name="SlopeSideRD" type="RayCast3D" parent="CharacterBody3D/VectorTwist/VectorPitch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 0)
+target_position = Vector3(0, -1.2, 0)
+
+[node name="RightLocal_vector" type="Node3D" parent="CharacterBody3D/VectorTwist/VectorPitch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0)
+
+[node name="Graphic" type="Node3D" parent="CharacterBody3D"]
+
+[node name="GraphicPitch" type="MeshInstance3D" parent="CharacterBody3D/Graphic"]
+mesh = SubResource("CapsuleMesh_d4e1h")
+skeleton = NodePath("../..")
+
+[node name="Twist" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.675, 0)
+
+[node name="Pitch" type="Node3D" parent="Twist"]
+
+[node name="Camera3D" type="Camera3D" parent="Twist/Pitch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.65)
+fov = 90.0

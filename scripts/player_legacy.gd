@@ -23,7 +23,7 @@ var apply_acceleration : bool = false
 var last_rotation : Vector3
 
 const STRT_SPEED := 7
-var SPEED_CAP := 40.4
+var SPEED_CAP := 50.4
 var SPEED = STRT_SPEED
 var LOSS_SPEED_WAlKING := 40
 var LOSS_SPEED_BREAKS := 27.6
@@ -35,8 +35,8 @@ const ACCELERATION := 19.8
 var LAST_GRAVITY = 0
 var LAST_NORMAL : Vector3
 const JUMP_STRT_SPEED := 30
-const JUMP_SPEED_CAP := 35.32
-const JUMP_ACC_DECEL := 200
+const JUMP_SPEED_CAP := 40
+const JUMP_ACC_DECEL := 380
 var JUMP_ACCELERATION = JUMP_STRT_SPEED
 var APPLIED_JUMP_ACCELERATION : float
 var APPLIED_START_SPEED : float
@@ -47,6 +47,9 @@ var picked_push_dir := Vector3.ZERO
 var last_frame_collision : bool
 var normal_cast : Vector3
 var angle : float
+
+var count_seconds_to_buffer_velocity = 0
+var buffered_velocity : Vector3
 
 func _ready():
 	floor_snap_length = 500
@@ -112,7 +115,7 @@ func rotate_player_body(delta, mode : int, lerp_bool : bool):
 					if slide_collision_point.distance_to(Center.get_collision_point()) > slide_collision_point.distance_to(Front.get_collision_point()):
 						collision_normal = Front.get_collision_normal()
 		else:
-			velocity = get_real_velocity()
+			velocity = buffered_velocity
 			set_motion_mode(MOTION_MODE_FLOATING)
 			return
 		if Center.is_colliding():
@@ -207,6 +210,10 @@ func rotate_based_on_velocity(delta):
 
 func _physics_process(delta):
 	$VelocityVector.target_position.y = 0
+	count_seconds_to_buffer_velocity += delta
+	if count_seconds_to_buffer_velocity >= 0.1:
+		count_seconds_to_buffer_velocity = 0
+		buffered_velocity = get_real_velocity()
 	
 	if Center.is_colliding() == true:
 		set_motion_mode(MOTION_MODE_GROUNDED)
@@ -259,16 +266,6 @@ func _physics_process(delta):
 		velocity.y -= gravity * delta 
 	# Get jump related input and handle jumping behaviour.
 	jump_input(delta)
-	if motion_mode == MOTION_MODE_GROUNDED and is_on_floor():
-		if not Input.is_action_just_pressed("jump"):
-			apply_floor_snap()
-		directional_input(delta)
-	else:
-		if sqrt(pow(velocity.x, 2) + pow(velocity.z, 2)) <= 4 and 4 >= sqrt(pow(velocity.x, 2) + pow(velocity.z, 2)):
-			SPEED = STRT_SPEED
-		directional_input_midair(delta)
-		chosen_direction = velocity
-		chosen_direction.y = 0
 	# Get collision normal, collision angle and rotate body accordingly
 	if is_on_floor():
 		if first_landed == false:
@@ -294,14 +291,24 @@ func _physics_process(delta):
 			rotate_player_body(delta, 1, true)
 		Center.force_raycast_update()
 		if not Center.is_colliding():
-			velocity = get_real_velocity()
+			velocity = buffered_velocity
 			set_motion_mode(MOTION_MODE_FLOATING)
 		else:
 			LAST_NORMAL = collision_normal
 	# Get movement direction related input and handle the velocity/acceleration.
+	if motion_mode == MOTION_MODE_GROUNDED and is_on_floor():
+		if not Input.is_action_pressed("jump") and not Input.is_action_just_pressed("jump"):
+			if last_frame_collision:
+				apply_floor_snap()
+		directional_input(delta)
+	else:
+		directional_input_midair(delta)
+		chosen_direction = velocity
+		chosen_direction.y = 0
 	
 	if (velocity.x + velocity.z) != 0:
 		rotate_based_on_velocity(delta)
+	
 	$VelocityVector.target_position.x = velocity.x
 	$VelocityVector.target_position.z = velocity.z
 	$VelocityVector.target_position.y = velocity.y
