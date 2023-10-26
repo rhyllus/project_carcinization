@@ -1,37 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://ceesh2n5sl4gr"]
+[gd_scene load_steps=4 format=3 uid="uid://ceesh2n5sl4gr"]
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_uwy4w"]
-radius = 1.0
+[ext_resource type="Script" path="res://scripts/player_properties.gd" id="1_nktjj"]
+[ext_resource type="PackedScene" uid="uid://1nmfr8wl8ugx" path="res://objects/camera.tscn" id="2_cifo1"]
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_s7jed"]
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_xwtt8"]
 
 [node name="Player" type="Node3D"]
+script = ExtResource("1_nktjj")
 
-[node name="CharacterBody3D" type="CharacterBody3D" parent="."]
+[node name="SceneGraphic" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_xwtt8")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
-shape = SubResource("SphereShape3D_uwy4w")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
-mesh = SubResource("CapsuleMesh_s7jed")
-
-[node name="Front" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
-
-[node name="Back" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
-
-[node name="Left" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 0)
-
-[node name="Right" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0)
-
-[node name="Twist" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
-
-[node name="Pitch" type="Node3D" parent="Twist"]
-
-[node name="Camera3D" type="Camera3D" parent="Twist/Pitch"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.5)
-fov = 90.0
+[node name="CameraTwist2" parent="." instance=ExtResource("2_cifo1")]
