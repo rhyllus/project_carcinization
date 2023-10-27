@@ -25,9 +25,20 @@ func _physics_process(delta):
 	elif player_state == player_states.GROUNDED:
 		get_directional_input()
 		horizontal_movement(delta)
+		if player_state == player_states.BREAKS:
+			horizontal_velocity = horizontal_velocity.move_toward(Vector3.ZERO, LOSS_BREAKS * delta)
 		CharacterBody.velocity = horizontal_velocity
+		if horizontal_velocity == Vector3.ZERO:
+			player_state = player_states.GROUNDED
+	elif player_state == player_states.BREAKS:
+		horizontal_velocity = horizontal_velocity.move_toward(Vector3.ZERO, LOSS_BREAKS * delta)
+		CharacterBody.velocity = horizontal_velocity
+		if horizontal_velocity == Vector3.ZERO:
+			player_state = player_states.GROUNDED
+			movement_reset()
 	if CharacterBody.is_on_floor():
-		player_state = player_states.GROUNDED
+		if player_state != player_states.BREAKS:
+			player_state = player_states.GROUNDED
 	else:
 		player_state = player_states.FLYING
 	CharacterBody.move_and_slide()

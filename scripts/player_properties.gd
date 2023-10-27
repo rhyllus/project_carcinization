@@ -20,6 +20,7 @@ var SPEED = START_SPEED
 var RUNNING_STATE : bool = false
 var COLLIDED_LAST_FRAME : bool = false
 @export var ACCELERATION := 19.8
+@export var TURNING_SPEED := 4.8
 
 @export var JUMP_START_SPEED := 30.0
 @export var JUMP_SPEED_CAP := 40.0
@@ -149,16 +150,39 @@ func change_gravity(dir : Vector3):
 	VectorTwist.rotation.x = angle_x_z.x
 	Graphic.rotation.x = angle_x_z.x
 	CharacterBody.up_direction = dir
-	
+
+func movement_reset():
+	SPEED = START_SPEED
+	chosen_dir = Vector3.ZERO
+
 func horizontal_movement(delta):
 	if input_dir:
+		if SPEED < START_SPEED:
+			SPEED = START_SPEED
 		SPEED += ACCELERATION * delta
 		if SPEED > JOG_START:
+			var input_rotated = input_dir.rotated(Vector3.UP, CharacterBody.get_node("Camera").rotation.y)
 			if SPEED > SPEED_CAP:
 				SPEED = move_toward(SPEED, SPEED_CAP, ACCELERATION * delta)
-		chosen_dir = input_dir.rotated(Vector3.UP, CharacterBody.get_node("Camera").rotation.y)
+			chosen_dir = chosen_dir.lerp(input_rotated, TURNING_SPEED * delta)
+			if VelocityVector.target_position.angle_to(input_rotated) >= PI/2:
+				player_state = player_states.BREAKS
+				return
+		else:
+			chosen_dir = input_dir.rotated(Vector3.UP, CharacterBody.get_node("Camera").rotation.y)
 	else:
-		SPEED = START_SPEED
+		if SPEED > JOG_START:
+			SPEED = move_toward(SPEED, 0, LOSS_RUNNING * delta)
+		else:
+			SPEED = move_toward(SPEED, 0, LOSS_WALKING * delta)
+			if SPEED == 0:
+				movement_reset()
 	horizontal_velocity = chosen_dir * SPEED
-	horizontal_velocity = horizontal_velocity.rotated(Vector3.LEFT, -gravity_last_angles.x)
-	horizontal_velocity = horizontal_velocity.rotated(Vector3.FORWARD, gravity_last_angles.z)
+	if gravity_last_angles.x > 0:
+		horizontal_velocity = horizontal_velocity.rotated(Vector3.FORWARD, gravity_last_angles.z)
+	else:
+		horizontal_velocity = horizontal_velocity.rotated(Vector3.FORWARD, -gravity_last_angles.z)
+	if gravity_last_angles.z < 0:
+		horizontal_velocity = horizontal_velocity.rotated(Vector3.LEFT, gravity_last_angles.x)
+	else:
+		horizontal_velocity = horizontal_velocity.rotated(Vector3.LEFT, -gravity_last_angles.x)
