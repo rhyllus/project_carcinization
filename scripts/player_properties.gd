@@ -4,12 +4,14 @@ class_name PlayerProperties
 
 var gravity : float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
-enum player_states {FLYING, GROUNDED, NODIR, ACTION}
+enum player_states {FLYING, GROUNDED, BREAKS, ACTION}
 var player_state := player_states.FLYING
 
 var input_dir : Vector3
 
 @export var START_SPEED := 7.0
+@export var JOG_START := 26.5
+var will_hit_breaks : bool = true
 @export var SPEED_CAP := 50.4
 var SPEED = START_SPEED
 @export var LOSS_WALKING := 40.0
@@ -28,8 +30,10 @@ var APPLIED_START_SPEED : float
 @export var JUMP_TIME := 2.0
 @export var JUMP_BUFFER_TIME := 0.15
 
-var pulse_velocity : float
-var pulse_direction : Vector3 = Vector3.ZERO
+var pulse_dir : Vector3 = Vector3.ZERO
+var chosen_dir : Vector3 = Vector3.ZERO
+var horizontal_velocity: Vector3 = Vector3.ZERO
+var gravity_last_angles : Vector3 = Vector3(0, 0, 0)
 
 var CharacterBody
 var CollisionShape
@@ -70,10 +74,16 @@ func _init():
 	VectorPitch = Node3D.new()
 	VectorTwist.add_child(VectorPitch)
 	Front = RayCast3D.new()
+	Front.target_position.y = -1.15
+	Front.debug_shape_custom_color = Color(1, 1, 0)
 	Back = RayCast3D.new()
+	Back.target_position.y = -1.15
 	Left = RayCast3D.new()
+	Left.target_position.y = -1.15
 	Right = RayCast3D.new()
+	Right.target_position.y = -1.15
 	Center = RayCast3D.new()
+	Center.target_position.y = -1.15
 	VectorPitch.add_child(Front)
 	Front.position.z = -1
 	VectorPitch.add_child(Back)
@@ -96,39 +106,59 @@ func _init():
 	GraphicTwist.add_child(Graphic)
 	Graphic.mesh.radius = 0.5
 	Graphic.mesh.height = 2
-
-func _ready():
-	if get_child_count() != 0:
-		for i in get_children():
-			if i is MeshInstance3D and i.name == "SceneGraphic":
-				i.queue_free()
-			elif i != CharacterBody:
-				i.reparent(CharacterBody, false)
-	
-	CharacterBody.floor_snap_length = 150
-	CharacterBody.floor_stop_on_slope = true
-	CharacterBody.slide_on_ceiling = true
-	CharacterBody.floor_constant_speed = true
-	CharacterBody.floor_max_angle = 88.9 * (PI/180)
 	
 func impulse(dir : Vector3, strength : float, time : float):
-	pulse_velocity = strength
-	pulse_direction = Vector3(dir.x * strength, dir.y * strength, dir.z * strength)
+	pulse_dir = dir * strength
 	if time != 0:
 		ZeroGravity.start(time)
-	
+	return pulse_dir
+
+func apply_gravity(delta):
+	var gravity_direction = CharacterBody.up_direction
+	gravity_direction = -gravity_direction * gravity * delta
+	CharacterBody.velocity += gravity_direction
+
 func get_directional_input():
 	var input = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	input_dir = Vector3(input.x, 0, input.y)
 	
 func get_action_input(delta):
 	pass
-	
-func change_gravity(angle_x : float, angle_z : float):
-	angle_x = rad_to_deg(angle_x)
-	angle_z = rad_to_deg(angle_z)
-	VectorTwist.rotation.x = angle_x
-	VectorTwist.rotation.z = angle_z
-	var dir : Vector3 = Vector3.UP.rotated(Vector3.FORWARD, angle_x)
-	dir = dir.rotated(Vector3.LEFT, angle_z)
+
+func vector_angle_calculator(vect1 : Vector3, vect2 : Vector3):
+	var dir_cast = vect2
+	var angle_x : float
+	var angle_z : float
+	dir_cast.z = 0
+	angle_z = vect1.angle_to(dir_cast)
+	if dir_cast.x > 0:
+		angle_z = -angle_z
+	dir_cast.z = vect2.z
+	dir_cast.x = 0
+	angle_x = vect1.angle_to(dir_cast)
+	if dir_cast.z < 0:
+		angle_x = -angle_x
+	return Vector3(angle_x, 0, angle_z)
+
+func change_gravity(dir : Vector3):
+	var angle_x_z : Vector3 = vector_angle_calculator(Vector3.UP, dir)
+	gravity_last_angles.x = angle_x_z.x
+	gravity_last_angles.z = angle_x_z.z
+	VectorTwist.rotation.z = angle_x_z.z
+	Graphic.rotation.z = angle_x_z.z
+	VectorTwist.rotation.x = angle_x_z.x
+	Graphic.rotation.x = angle_x_z.x
 	CharacterBody.up_direction = dir
+	
+func horizontal_movement(delta):
+	if input_dir:
+		SPEED += ACCELERATION * delta
+		if SPEED > JOG_START:
+			if SPEED > SPEED_CAP:
+				SPEED = move_toward(SPEED, SPEED_CAP, ACCELERATION * delta)
+		chosen_dir = input_dir.rotated(Vector3.UP, CharacterBody.get_node("Camera").rotation.y)
+	else:
+		SPEED = START_SPEED
+	horizontal_velocity = chosen_dir * SPEED
+	horizontal_velocity = horizontal_velocity.rotated(Vector3.LEFT, -gravity_last_angles.x)
+	horizontal_velocity = horizontal_velocity.rotated(Vector3.FORWARD, gravity_last_angles.z)

@@ -12,4 +12,4 @@ script = ExtResource("1_dpwdi")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.5)
 fov = 90.0
 
-[node name="CameraClone" type="Node3D" parent="CameraPitch"]
+[node name="TwistClone" type="Node3D" parent="."]
