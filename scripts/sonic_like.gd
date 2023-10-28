@@ -28,6 +28,13 @@ func _physics_process(delta):
 	else:
 		player_state = player_states.FLYING
 	if player_state == player_states.FLYING:
+		get_directional_input()
+		var input_rotated = input_dir.rotated(Vector3.UP, CharacterBody.get_node("Camera").rotation.y)
+		var y_velocity_temp = CharacterBody.velocity.y
+		CharacterBody.velocity.y = 0
+		CharacterBody.velocity = CharacterBody.velocity.lerp(input_rotated * SPEED, TURNING_SPEED / 6 * delta)
+		chosen_dir = chosen_dir.lerp(input_rotated, TURNING_SPEED / 6 * delta)
+		CharacterBody.velocity.y = y_velocity_temp
 		apply_gravity(delta)
 		rotation_reset(delta)
 	elif player_state == player_states.GROUNDED:
