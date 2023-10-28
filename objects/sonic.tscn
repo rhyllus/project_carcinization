@@ -7,6 +7,7 @@
 
 [node name="SonicLike" type="Node3D"]
 script = ExtResource("2_2ycre")
+JOG_START = 23.5
 
 [node name="Camera" parent="." instance=ExtResource("3_xs73s")]
 
