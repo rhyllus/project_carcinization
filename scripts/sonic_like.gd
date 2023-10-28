@@ -19,6 +19,7 @@ func _ready():
 	CharacterBody.floor_max_angle = 88.9 * (PI/180)
 
 func _physics_process(delta):
+	HorizontalMidair.global_position = CharacterBody.global_position
 	CharacterBody.set_motion_mode(CharacterBody.MOTION_MODE_GROUNDED)
 	VelocityVector.target_position = CharacterBody.velocity / 10
 	if CharacterBody.is_on_floor():

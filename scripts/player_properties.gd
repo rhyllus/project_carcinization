@@ -23,7 +23,7 @@ var COLLIDED_LAST_FRAME : bool = false
 var is_on_wall_extra : bool = false
 
 @export var JUMP_START_SPEED := 500.0
-@export var JUMP_DECELERATION := 2900.0
+@export var JUMP_DECELERATION := 3600.0
 var JUMP_VELOCITY = JUMP_START_SPEED
 var APPLIED_JUMP_ACCELERATION : float
 var APPLIED_START_SPEED : float
@@ -36,6 +36,7 @@ var horizontal_velocity: Vector3 = Vector3.ZERO
 var gravity_last_angles : Vector3 = Vector3(0, 0, 0)
 
 var CharacterBody
+var HorizontalMidair
 var CollisionShape
 var JumpTimer
 var JumpBuffer
@@ -46,7 +47,9 @@ var VectorPitch
 var Front
 var Back
 var Left
+var Left2
 var Right
+var Right2
 var Center
 var VelocityVector
 var GraphicTwist
@@ -55,6 +58,8 @@ var Graphic
 func _init():	
 	CharacterBody = CharacterBody3D.new()
 	add_child(CharacterBody)
+	HorizontalMidair = CharacterBody3D.new()
+	CharacterBody.add_child(HorizontalMidair)
 	CollisionShape = CollisionShape3D.new()
 	CollisionShape.shape = SphereShape3D.new()
 	CollisionShape.shape.radius = 1
@@ -83,8 +88,12 @@ func _init():
 	Back.target_position.y = -1.15
 	Left = RayCast3D.new()
 	Left.target_position.y = -1.15
+	Left2 = RayCast3D.new()
+	Left2.target_position.y = -1.15
 	Right = RayCast3D.new()
 	Right.target_position.y = -1.15
+	Right2 = RayCast3D.new()
+	Right2.target_position.y = -1.15
 	Center = RayCast3D.new()
 	Center.target_position.y = -1.15
 	VectorPitch.add_child(Front)
@@ -93,8 +102,14 @@ func _init():
 	Back.position.z = 1
 	VectorPitch.add_child(Left)
 	Left.position.x = -1
+	VectorPitch.add_child(Left2)
+	Left2.position.x = 0.75
+	Left2.position.z = -0.75
 	VectorPitch.add_child(Right)
 	Right.position.x = 1
+	VectorPitch.add_child(Right2)
+	Right2.position.x = -0.75
+	Right2.position.z = -0.75
 	VectorPitch.add_child(Center)
 	
 	VelocityVector = RayCast3D.new()
@@ -146,11 +161,11 @@ func vector_angle_calculator(vect1 : Vector3, vect2 : Vector3):
 func change_gravity(dir : Vector3) -> void:
 	var angle_x_z : Vector3 = vector_angle_calculator(Vector3.UP, dir)
 	gravity_last_angles.x = angle_x_z.x
-	gravity_last_angles.z = angle_x_z.z
-	VectorTwist_z.rotation.z = -angle_x_z.z
-	Graphic.rotation.z = angle_x_z.z
-	VectorTwist_x.rotation.x = angle_x_z.x
-	Graphic.rotation.x = angle_x_z.x
+	gravity_last_angles.z = -angle_x_z.z
+	VectorTwist_z.rotation.z = gravity_last_angles.z
+	Graphic.rotation.z = gravity_last_angles.z
+	VectorTwist_x.rotation.x = gravity_last_angles.x
+	Graphic.rotation.x = gravity_last_angles.x
 	CharacterBody.up_direction = dir
 
 func movement_reset() -> void:
@@ -214,22 +229,25 @@ func rotate_player_body(delta, mode : int, lerp_bool : bool) -> void:
 			collision_normal = compare_center_to_ray(Left)
 			if collision_normal == Vector3.ZERO:
 				collision_normal = compare_center_to_ray(Right)
+				if collision_normal == Vector3.ZERO:
+					collision_normal = compare_center_to_ray(Left2)
+					if collision_normal == Vector3.ZERO:
+						collision_normal = compare_center_to_ray(Right2)
 		if Center.is_colliding():
 			if collision_normal == Vector3.ZERO:
 				collision_normal = last_rotation
 		else:
 			player_state = player_states.FLOATING
 			CharacterBody.velocity = CharacterBody.get_real_velocity()
-			movement_reset()
 			return
 	elif mode == 0:
 		collision_normal = CharacterBody.get_floor_normal()
 	var angle_x_z : Vector3 = vector_angle_calculator(Vector3.UP, collision_normal)
 	if lerp_bool:
-		Graphic.rotation.x = lerp_angle(Graphic.rotation.x, angle_x_z.x, 15 * delta)
-		Graphic.rotation.z = lerp_angle(Graphic.rotation.z, angle_x_z.z, 15 * delta)
-	VectorTwist_x.rotation.x = angle_x_z.x
-	VectorTwist_z.rotation.z = angle_x_z.z
+		Graphic.rotation.x = lerp_angle(Graphic.rotation.x, angle_x_z.x + (gravity_last_angles.x * 2), 15 * delta)
+		Graphic.rotation.z = lerp_angle(Graphic.rotation.z, angle_x_z.z + (gravity_last_angles.z * 2), 15 * delta)
+	VectorTwist_x.rotation.x = angle_x_z.x + (gravity_last_angles.x * 2)
+	VectorTwist_z.rotation.z = angle_x_z.z + (gravity_last_angles.z * 2)
 
 func jump_input(delta) -> void:
 	if Input.is_action_just_pressed("jump"):
@@ -259,7 +277,7 @@ func rotate_based_on_velocity(delta):
 	Graphic.rotation.y = lerp_angle(GraphicTwist.rotation.y, angle, delta * 15)
 	
 func rotation_reset(delta):
-	Graphic.rotation.x = lerp_angle(Graphic.rotation.x, 0, delta * 5)
-	VectorTwist_x.rotation.x = 0
-	Graphic.rotation.z = lerp_angle(Graphic.rotation.z, 0, delta * 5)
-	VectorTwist_z.rotation.z = 0
+	Graphic.rotation.x = lerp_angle(Graphic.rotation.x, gravity_last_angles.x, delta * 5)
+	VectorTwist_x.rotation.x = gravity_last_angles.x
+	Graphic.rotation.z = lerp_angle(Graphic.rotation.z, gravity_last_angles.z, delta * 5)
+	VectorTwist_z.rotation.z = gravity_last_angles.z

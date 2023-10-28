@@ -267,4 +267,4 @@ mesh = SubResource("BoxMesh_4lf57")
 shape = SubResource("ConcavePolygonShape3D_uauoq")
 
 [node name="SonicLike" parent="." instance=ExtResource("1_q1wbx")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6874, 3.77594, -19.2407)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73.1944, 3.77594, 24.6527)
