@@ -22,8 +22,8 @@ var COLLIDED_LAST_FRAME : bool = false
 @export var TURNING_SPEED := 4.8
 var is_on_wall_extra : bool = false
 
-@export var JUMP_START_SPEED := 500.0
-@export var JUMP_DECELERATION := 3600.0
+@export var JUMP_START_SPEED := 630.0
+@export var JUMP_DECELERATION := 5500.0
 var JUMP_VELOCITY = JUMP_START_SPEED
 var APPLIED_JUMP_ACCELERATION : float
 var APPLIED_START_SPEED : float
@@ -261,13 +261,14 @@ func jump_input(delta) -> void:
 	elif Input.is_action_pressed("jump") and not JumpTimer.is_stopped():
 		JUMP_VELOCITY = move_toward(JUMP_VELOCITY, 0, JUMP_DECELERATION * delta)
 		CharacterBody.velocity.y += JUMP_VELOCITY * delta
+		apply_gravity(delta)
 	elif Input.is_action_just_released("jump"):
 		JumpTimer.stop()
 		player_state = player_states.GROUNDED
 		APPLIED_JUMP_ACCELERATION = 0
 		CharacterBody.velocity.y -= JUMP_VELOCITY * delta
 		JUMP_VELOCITY = JUMP_START_SPEED
-	if not JumpBuffer.is_stopped() and CharacterBody.is_on_floor():
+	if not JumpBuffer.is_stopped() and CharacterBody.is_on_floor() and JumpTimer.is_stopped():
 		player_state = player_states.JUMPING
 		CharacterBody.velocity.y += JUMP_VELOCITY * delta
 		APPLIED_START_SPEED = CharacterBody.velocity.y
