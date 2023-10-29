@@ -177,6 +177,8 @@ func breaks(delta) -> void:
 		movement_reset()
 
 func horizontal_movement(delta) -> void:
+	var temp_vel_vector_y = VelocityVector.target_position.y
+	VelocityVector.target_position.y = 0
 	if input_dir:
 		if SPEED < START_SPEED:
 			SPEED = START_SPEED
@@ -207,6 +209,7 @@ func horizontal_movement(delta) -> void:
 		horizontal_velocity = horizontal_velocity.rotated(Vector3.LEFT, gravity_last_angles.x)
 	else:
 		horizontal_velocity = horizontal_velocity.rotated(Vector3.LEFT, -gravity_last_angles.x)
+	VelocityVector.target_position.y = temp_vel_vector_y
 
 func compare_center_to_ray(ray : RayCast3D):
 	if ray.is_colliding():
@@ -281,11 +284,14 @@ func jump_input(delta) -> void:
 
 func rotate_based_on_velocity(delta):
 	if abs(VelocityVector.target_position.x) + abs(VelocityVector.target_position.z) != 0:
+		var temp_vel_vector_y = VelocityVector.target_position.y
+		VelocityVector.target_position.y = 0
 		var angle = Vector3.FORWARD.angle_to(VelocityVector.target_position)
 		if Vector3.LEFT.angle_to(VelocityVector.target_position) > Vector3.RIGHT.angle_to(VelocityVector.target_position):
 			angle = -angle
 		VectorPitch.rotation.y = angle
 		Graphic.rotation.y = lerp_angle(Graphic.rotation.y, angle, delta * 15)
+		VelocityVector.target_position.y = temp_vel_vector_y
 	
 func rotation_reset(delta):
 	GraphicTwist.rotation.x = lerp_angle(GraphicTwist.rotation.x, 0, delta * 4)
