@@ -1,0 +1,16 @@
+[gd_scene load_steps=5 format=3 uid="uid://2cr7o7xy1w0u"]
+
+[ext_resource type="Texture2D" uid="uid://c7haapxmctgvd" path="res://textures/icon.svg" id="1_thtg7"]
+[ext_resource type="Script" path="res://scripts/rotato.gd" id="2_yxxud"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_08kur"]
+albedo_texture = ExtResource("1_thtg7")
+
+[sub_resource type="SphereMesh" id="SphereMesh_ajmay"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Graphic" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_08kur")
+mesh = SubResource("SphereMesh_ajmay")
+script = ExtResource("2_yxxud")

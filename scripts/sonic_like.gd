@@ -65,7 +65,17 @@ func _physics_process(delta):
 			rotate_based_on_velocity(delta)
 	elif player_state == player_states.BREAKS:
 		rotate_player_body(delta, 0, false)
+		Center.force_raycast_update()
 		rotate_player_body(delta, 1, true)
+		Center.force_raycast_update()
+		rotate_player_body(delta, 1, true)
+		Center.force_raycast_update()
+		if not Center.is_colliding():
+			player_state = player_states.FLOATING
+			CharacterBody.velocity = CharacterBody.get_real_velocity()
+		if player_state == player_states.FLOATING:
+			CharacterBody.set_motion_mode(CharacterBody.MOTION_MODE_FLOATING)
+			apply_gravity(delta)
 		breaks(delta)
 	jump_input(delta)
 	CharacterBody.move_and_slide()

@@ -280,11 +280,12 @@ func jump_input(delta) -> void:
 		JUMP_VELOCITY = JUMP_START_SPEED
 
 func rotate_based_on_velocity(delta):
-	var angle = Vector3.FORWARD.angle_to(VelocityVector.target_position)
-	if Vector3.LEFT.angle_to(VelocityVector.target_position) > Vector3.RIGHT.angle_to(VelocityVector.target_position):
-		angle = -angle
-	VectorPitch.rotation.y = angle
-	Graphic.rotation.y = lerp_angle(GraphicTwist.rotation.y, angle, delta * 15)
+	if abs(VelocityVector.target_position.x) + abs(VelocityVector.target_position.z) != 0:
+		var angle = Vector3.FORWARD.angle_to(VelocityVector.target_position)
+		if Vector3.LEFT.angle_to(VelocityVector.target_position) > Vector3.RIGHT.angle_to(VelocityVector.target_position):
+			angle = -angle
+		VectorPitch.rotation.y = angle
+		Graphic.rotation.y = lerp_angle(GraphicTwist.rotation.y, angle, delta * 15)
 	
 func rotation_reset(delta):
 	Graphic.rotation.x = lerp_angle(Graphic.rotation.x, 0, delta * 4)
