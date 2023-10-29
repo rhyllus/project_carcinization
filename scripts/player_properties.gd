@@ -241,11 +241,11 @@ func rotate_player_body(delta, mode : int, lerp_bool : bool) -> void:
 		collision_normal = CharacterBody.get_floor_normal()
 	var angle_x_z : Vector3 = vector_angle_calculator(Vector3.UP, collision_normal)
 	if lerp_bool:
-		Graphic.rotation.x = lerp_angle(Graphic.rotation.x, angle_x_z.x, 15 * delta)
-		Graphic.rotation.z = lerp_angle(Graphic.rotation.z, angle_x_z.z, 15 * delta)
+		GraphicTwist.rotation.x = lerp_angle(GraphicTwist.rotation.x, angle_x_z.x, 15 * delta)
+		GraphicTwist.rotation.z = lerp_angle(GraphicTwist.rotation.z, angle_x_z.z, 15 * delta)
 	else:
-		Graphic.rotation.x = Graphic.rotation.x
-		Graphic.rotation.z = Graphic.rotation.z
+		GraphicTwist.rotation.x = GraphicTwist.rotation.x
+		GraphicTwist.rotation.z = GraphicTwist.rotation.z
 	VectorTwist_x.rotation.x = angle_x_z.x
 	VectorTwist_z.rotation.z = angle_x_z.z
 
@@ -285,10 +285,10 @@ func rotate_based_on_velocity(delta):
 		if Vector3.LEFT.angle_to(VelocityVector.target_position) > Vector3.RIGHT.angle_to(VelocityVector.target_position):
 			angle = -angle
 		VectorPitch.rotation.y = angle
-		Graphic.rotation.y = lerp_angle(GraphicTwist.rotation.y, angle, delta * 15)
+		Graphic.rotation.y = lerp_angle(Graphic.rotation.y, angle, delta * 15)
 	
 func rotation_reset(delta):
-	Graphic.rotation.x = lerp_angle(Graphic.rotation.x, 0, delta * 4)
+	GraphicTwist.rotation.x = lerp_angle(GraphicTwist.rotation.x, 0, delta * 4)
 	VectorTwist_x.rotation.x = 0
-	Graphic.rotation.z = lerp_angle(Graphic.rotation.z, 0, delta * 4)
+	GraphicTwist.rotation.z = lerp_angle(GraphicTwist.rotation.z, 0, delta * 4)
 	VectorTwist_z.rotation.z = 0

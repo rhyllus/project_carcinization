@@ -8,6 +8,7 @@ func _ready():
 	if get_child_count() != 0:
 		for i in get_children():
 			if i is MeshInstance3D and i.name == "SceneGraphic":
+				Graphic.material_override = i.material_override
 				i.queue_free()
 			elif i != CharacterBody:
 				i.reparent(CharacterBody, false)

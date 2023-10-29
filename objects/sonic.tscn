@@ -1,7 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://bpvlpukf8jdpa"]
+[gd_scene load_steps=6 format=3 uid="uid://bpvlpukf8jdpa"]
 
 [ext_resource type="Script" path="res://scripts/sonic_like.gd" id="2_2ycre"]
+[ext_resource type="Texture2D" uid="uid://c7haapxmctgvd" path="res://textures/icon.svg" id="3_5do0a"]
 [ext_resource type="PackedScene" uid="uid://1nmfr8wl8ugx" path="res://objects/camera.tscn" id="3_xs73s"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l5msl"]
+albedo_texture = ExtResource("3_5do0a")
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_c0hdt"]
 
@@ -12,4 +16,5 @@ JOG_START = 23.5
 [node name="Camera" parent="." instance=ExtResource("3_xs73s")]
 
 [node name="SceneGraphic" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_l5msl")
 mesh = SubResource("CapsuleMesh_c0hdt")
