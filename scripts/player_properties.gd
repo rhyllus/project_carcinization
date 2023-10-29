@@ -184,7 +184,7 @@ func horizontal_movement(delta) -> void:
 			SPEED = START_SPEED
 		SPEED += ACCELERATION * delta
 		if SPEED > JOG_START:
-			var input_rotated = input_dir.rotated(Vector3.UP, CharacterBody.get_node("Camera").rotation.y)
+			var input_rotated = input_dir.rotated(Vector3.UP, GraphicTwist.get_node("Camera").rotation.y)
 			if SPEED > SPEED_CAP:
 				SPEED = move_toward(SPEED, SPEED_CAP, ACCELERATION * delta)
 			chosen_dir = chosen_dir.lerp(input_rotated, TURNING_SPEED * delta)
@@ -192,7 +192,7 @@ func horizontal_movement(delta) -> void:
 				player_state = player_states.BREAKS
 				return
 		else:
-			chosen_dir = input_dir.rotated(Vector3.UP, CharacterBody.get_node("Camera").rotation.y)
+			chosen_dir = input_dir.rotated(Vector3.UP, GraphicTwist.get_node("Camera").rotation.y)
 	else:
 		if SPEED > JOG_START:
 			SPEED = move_toward(SPEED, 0, LOSS_RUNNING * delta)

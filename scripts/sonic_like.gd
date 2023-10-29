@@ -11,7 +11,7 @@ func _ready():
 				Graphic.material_override = i.material_override
 				i.queue_free()
 			elif i != CharacterBody:
-				i.reparent(CharacterBody, false)
+				i.reparent(GraphicTwist, false)
 	
 	CharacterBody.floor_snap_length = 150
 	CharacterBody.floor_stop_on_slope = true
@@ -34,7 +34,7 @@ func _physics_process(delta):
 	if player_state == player_states.FLYING:
 		get_directional_input()
 		if input_dir:
-			var input_rotated = input_dir.rotated(Vector3.UP, CharacterBody.get_node("Camera").rotation.y)
+			var input_rotated = input_dir.rotated(Vector3.UP, GraphicTwist.get_node("Camera").rotation.y)
 			var y_velocity_temp = CharacterBody.velocity.y
 			CharacterBody.velocity.y = 0
 			CharacterBody.velocity = CharacterBody.velocity.lerp(input_rotated * SPEED, TURNING_SPEED / 7 * delta)
