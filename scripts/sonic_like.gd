@@ -19,29 +19,40 @@ func _ready():
 	CharacterBody.floor_max_angle = 88.9 * (PI/180)
 
 func _physics_process(delta):
-	HorizontalMidair.global_position = CharacterBody.global_position
 	CharacterBody.set_motion_mode(CharacterBody.MOTION_MODE_GROUNDED)
 	VelocityVector.target_position = CharacterBody.velocity / 10
-	if CharacterBody.is_on_floor():
-		if player_state != player_states.BREAKS:
-			player_state = player_states.GROUNDED
+	if JumpTimer.is_stopped():
+		if CharacterBody.is_on_floor():
+			if player_state != player_states.BREAKS:
+				player_state = player_states.GROUNDED
+		else:
+			player_state = player_states.FLYING
 	else:
-		player_state = player_states.FLYING
+		rotation_reset(delta)
+		rotate_based_on_velocity(delta)
 	if player_state == player_states.FLYING:
 		get_directional_input()
-		var input_rotated = input_dir.rotated(Vector3.UP, CharacterBody.get_node("Camera").rotation.y)
-		var y_velocity_temp = CharacterBody.velocity.y
-		CharacterBody.velocity.y = 0
-		CharacterBody.velocity = CharacterBody.velocity.lerp(input_rotated * SPEED, TURNING_SPEED / 6 * delta)
-		chosen_dir = chosen_dir.lerp(input_rotated, TURNING_SPEED / 6 * delta)
-		CharacterBody.velocity.y = y_velocity_temp
+		if input_dir:
+			var input_rotated = input_dir.rotated(Vector3.UP, CharacterBody.get_node("Camera").rotation.y)
+			var y_velocity_temp = CharacterBody.velocity.y
+			CharacterBody.velocity.y = 0
+			CharacterBody.velocity = CharacterBody.velocity.lerp(input_rotated * SPEED, TURNING_SPEED / 7 * delta)
+			chosen_dir = chosen_dir.lerp(input_rotated, TURNING_SPEED / 7 * delta)
+			CharacterBody.velocity.y = y_velocity_temp
 		apply_gravity(delta)
 		rotation_reset(delta)
+		rotate_based_on_velocity(delta)
 	elif player_state == player_states.GROUNDED:
 		rotate_player_body(delta, 0, false)
+		Center.force_raycast_update()
 		rotate_player_body(delta, 1, true)
+		Center.force_raycast_update()
+		if not Center.is_colliding():
+			player_state = player_states.FLOATING
+			CharacterBody.velocity = CharacterBody.get_real_velocity()
 		if player_state == player_states.FLOATING:
 			CharacterBody.set_motion_mode(CharacterBody.MOTION_MODE_FLOATING)
+			apply_gravity(delta)
 		else:
 			get_directional_input()
 			horizontal_movement(delta)
@@ -58,3 +69,7 @@ func _physics_process(delta):
 		breaks(delta)
 	jump_input(delta)
 	CharacterBody.move_and_slide()
+	if player_state == player_states.JUMPING:
+		CharacterBody.floor_snap_length = 0
+	else:
+		CharacterBody.floor_snap_length = 150

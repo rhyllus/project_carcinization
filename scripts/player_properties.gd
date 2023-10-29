@@ -4,7 +4,7 @@ class_name PlayerProperties
 
 var gravity : float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
-enum player_states {FLYING, GROUNDED, BREAKS, ACTION, FLOATING}
+enum player_states {FLYING, GROUNDED, BREAKS, ACTION, FLOATING, JUMPING}
 var player_state := player_states.FLYING
 
 var input_dir : Vector3
@@ -36,7 +36,6 @@ var horizontal_velocity: Vector3 = Vector3.ZERO
 var gravity_last_angles : Vector3 = Vector3(0, 0, 0)
 
 var CharacterBody
-var HorizontalMidair
 var CollisionShape
 var JumpTimer
 var JumpBuffer
@@ -58,8 +57,6 @@ var Graphic
 func _init():	
 	CharacterBody = CharacterBody3D.new()
 	add_child(CharacterBody)
-	HorizontalMidair = CharacterBody3D.new()
-	CharacterBody.add_child(HorizontalMidair)
 	CollisionShape = CollisionShape3D.new()
 	CollisionShape.shape = SphereShape3D.new()
 	CollisionShape.shape.radius = 1
@@ -246,6 +243,9 @@ func rotate_player_body(delta, mode : int, lerp_bool : bool) -> void:
 	if lerp_bool:
 		Graphic.rotation.x = lerp_angle(Graphic.rotation.x, angle_x_z.x, 15 * delta)
 		Graphic.rotation.z = lerp_angle(Graphic.rotation.z, angle_x_z.z, 15 * delta)
+	else:
+		Graphic.rotation.x = Graphic.rotation.x
+		Graphic.rotation.z = Graphic.rotation.z
 	VectorTwist_x.rotation.x = angle_x_z.x
 	VectorTwist_z.rotation.z = angle_x_z.z
 
@@ -254,20 +254,29 @@ func jump_input(delta) -> void:
 		if not CharacterBody.is_on_floor():
 			JumpBuffer.start(0.22)
 		elif CharacterBody.is_on_floor():
-			CharacterBody.velocity.y = CharacterBody.get_real_velocity().y
+			player_state = player_states.JUMPING
 			CharacterBody.velocity.y += JUMP_VELOCITY * delta
 			APPLIED_START_SPEED = CharacterBody.velocity.y
-			JumpTimer.start(0.2)
+			JumpTimer.start(0.3)
 	elif Input.is_action_pressed("jump") and not JumpTimer.is_stopped():
 		JUMP_VELOCITY = move_toward(JUMP_VELOCITY, 0, JUMP_DECELERATION * delta)
 		CharacterBody.velocity.y += JUMP_VELOCITY * delta
 	elif Input.is_action_just_released("jump"):
 		JumpTimer.stop()
+		player_state = player_states.GROUNDED
 		APPLIED_JUMP_ACCELERATION = 0
 		CharacterBody.velocity.y -= JUMP_VELOCITY * delta
 		JUMP_VELOCITY = JUMP_START_SPEED
 	if not JumpBuffer.is_stopped() and CharacterBody.is_on_floor():
+		player_state = player_states.JUMPING
+		CharacterBody.velocity.y += JUMP_VELOCITY * delta
+		APPLIED_START_SPEED = CharacterBody.velocity.y
 		JumpTimer.start(0.3)
+	elif CharacterBody.velocity.y < 0 and CharacterBody.is_on_floor():
+		JumpTimer.stop()
+		player_state = player_states.GROUNDED
+		APPLIED_JUMP_ACCELERATION = 0
+		JUMP_VELOCITY = JUMP_START_SPEED
 
 func rotate_based_on_velocity(delta):
 	var angle = Vector3.FORWARD.angle_to(VelocityVector.target_position)
@@ -277,7 +286,7 @@ func rotate_based_on_velocity(delta):
 	Graphic.rotation.y = lerp_angle(GraphicTwist.rotation.y, angle, delta * 15)
 	
 func rotation_reset(delta):
-	Graphic.rotation.x = lerp_angle(Graphic.rotation.x, 0, delta * 5)
+	Graphic.rotation.x = lerp_angle(Graphic.rotation.x, 0, delta * 4)
 	VectorTwist_x.rotation.x = 0
-	Graphic.rotation.z = lerp_angle(Graphic.rotation.z, 0, delta * 5)
+	Graphic.rotation.z = lerp_angle(Graphic.rotation.z, 0, delta * 4)
 	VectorTwist_z.rotation.z = 0
