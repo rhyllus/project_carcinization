@@ -302,7 +302,7 @@ func check_camera_pos_validity(delta):
 	var camera_collider = GraphicTwist.get_node("Camera").get_node("CameraPitch").get_node("CameraCollider")
 	var camera_itself = GraphicTwist.get_node("Camera").get_node("CameraPitch").get_node("Camera3D")
 	camera_collider.force_raycast_update()
-	if camera_collider.is_colliding():
+	if camera_collider.is_colliding() and camera_collider.get_collider().name != "@CharacterBody3D@2":
 		camera_itself.global_position = camera_collider.get_collision_point()
 		camera_itself.position.z -= 0.5
 	else:
