@@ -188,7 +188,7 @@ func horizontal_movement(delta) -> void:
 			if SPEED > SPEED_CAP:
 				SPEED = move_toward(SPEED, SPEED_CAP, ACCELERATION * delta)
 			chosen_dir = chosen_dir.lerp(input_rotated, TURNING_SPEED * delta)
-			if VelocityVector.target_position.angle_to(input_rotated) >= (PI * 0.6):
+			if VelocityVector.target_position.angle_to(input_rotated) >= (PI * 0.5):
 				player_state = player_states.BREAKS
 				return
 		else:
@@ -201,14 +201,8 @@ func horizontal_movement(delta) -> void:
 			if SPEED == 0:
 				movement_reset()
 	horizontal_velocity = chosen_dir * SPEED
-	if gravity_last_angles.x > 0:
-		horizontal_velocity = horizontal_velocity.rotated(Vector3.FORWARD, -gravity_last_angles.z)
-	else:
-		horizontal_velocity = horizontal_velocity.rotated(Vector3.FORWARD, gravity_last_angles.z)
-	if gravity_last_angles.z < 0:
-		horizontal_velocity = horizontal_velocity.rotated(Vector3.LEFT, gravity_last_angles.x)
-	else:
-		horizontal_velocity = horizontal_velocity.rotated(Vector3.LEFT, -gravity_last_angles.x)
+	if CharacterBody.up_direction == Vector3.DOWN:
+		horizontal_velocity.x = -horizontal_velocity.x
 	VelocityVector.target_position.y = temp_vel_vector_y
 
 func compare_center_to_ray(ray : RayCast3D):
@@ -243,9 +237,11 @@ func rotate_player_body(delta, mode : int, lerp_bool : bool) -> void:
 	elif mode == 0:
 		collision_normal = CharacterBody.get_floor_normal()
 	var angle_x_z : Vector3 = vector_angle_calculator(Vector3.UP, collision_normal)
+	if CharacterBody.up_direction == Vector3.DOWN:
+		angle_x_z.x += PI
 	if lerp_bool:
-		GraphicTwist.rotation.x = lerp_angle(GraphicTwist.rotation.x, angle_x_z.x, 15 * delta)
-		GraphicTwist.rotation.z = lerp_angle(GraphicTwist.rotation.z, angle_x_z.z, 15 * delta)
+		GraphicTwist.rotation.x = lerp_angle(GraphicTwist.rotation.x, angle_x_z.x, 6.5 * delta)
+		GraphicTwist.rotation.z = lerp_angle(GraphicTwist.rotation.z, angle_x_z.z, 6.5 * delta)
 	else:
 		GraphicTwist.rotation.x = GraphicTwist.rotation.x
 		GraphicTwist.rotation.z = GraphicTwist.rotation.z
@@ -290,11 +286,24 @@ func rotate_based_on_velocity(delta):
 		if Vector3.LEFT.angle_to(VelocityVector.target_position) > Vector3.RIGHT.angle_to(VelocityVector.target_position):
 			angle = -angle
 		VectorPitch.rotation.y = angle
-		Graphic.rotation.y = lerp_angle(Graphic.rotation.y, angle, delta * 15)
+		Graphic.rotation.y = lerp_angle(Graphic.rotation.y, angle, delta * 6.5)
 		VelocityVector.target_position.y = temp_vel_vector_y
 	
 func rotation_reset(delta):
-	GraphicTwist.rotation.x = lerp_angle(GraphicTwist.rotation.x, 0, delta * 4)
-	VectorTwist_x.rotation.x = 0
-	GraphicTwist.rotation.z = lerp_angle(GraphicTwist.rotation.z, 0, delta * 4)
-	VectorTwist_z.rotation.z = 0
+	var angle_x_z = Vector3(gravity_last_angles.x, 0, gravity_last_angles.z)
+	if CharacterBody.up_direction == Vector3.DOWN:
+		angle_x_z.x += PI
+	GraphicTwist.rotation.x = lerp_angle(GraphicTwist.rotation.x, angle_x_z.x, delta * 4)
+	VectorTwist_x.rotation.x = angle_x_z.x
+	GraphicTwist.rotation.z = lerp_angle(GraphicTwist.rotation.z, angle_x_z.z, delta * 4)
+	VectorTwist_z.rotation.z = angle_x_z.z
+
+func check_camera_pos_validity(delta):
+	var camera_collider = GraphicTwist.get_node("Camera").get_node("CameraPitch").get_node("CameraCollider")
+	var camera_itself = GraphicTwist.get_node("Camera").get_node("CameraPitch").get_node("Camera3D")
+	camera_collider.force_raycast_update()
+	if camera_collider.is_colliding():
+		camera_itself.global_position = camera_collider.get_collision_point()
+		camera_itself.position.z -= 0.5
+	else:
+		camera_itself.position.z = move_toward(camera_itself.position.z, 4.5, 10 * delta)

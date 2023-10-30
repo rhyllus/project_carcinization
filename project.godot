@@ -51,4 +51,4 @@ move_left={
 [physics]
 
 common/physics_ticks_per_second=360
-3d/default_gravity=46.0
+3d/default_gravity=65.0
