@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3 uid="uid://cx51yccpd388c"]
+
+[ext_resource type="Texture2D" uid="uid://cuo2l3a5dgk1c" path="res://icon.svg" id="1_rexis"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_u3fni"]
+radius = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jq8k4"]
+albedo_texture = ExtResource("1_rexis")
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_e71cs"]
+
+[node name="Player" type="Node3D"]
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
+shape = SubResource("SphereShape3D_u3fni")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
+material_override = SubResource("StandardMaterial3D_jq8k4")
+mesh = SubResource("CapsuleMesh_e71cs")
