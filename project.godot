@@ -11,5 +11,14 @@ config_version=5
 [application]
 
 config/name="Project Carcinization"
-config/features=PackedStringArray("4.1", "Forward Plus")
+run/main_scene="res://scenes/maps/world.tscn"
+config/features=PackedStringArray("4.1", "C#", "Forward Plus")
 config/icon="res://icon.svg"
+
+[dotnet]
+
+project/assembly_name="Project Carcinization"
+
+[physics]
+
+common/physics_ticks_per_second=360

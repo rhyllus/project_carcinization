@@ -1,6 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://cx51yccpd388c"]
+[gd_scene load_steps=8 format=3 uid="uid://cx51yccpd388c"]
 
+[ext_resource type="Script" path="res://scripts/player_scripts/tsopits.cs" id="1_0u8ci"]
 [ext_resource type="Texture2D" uid="uid://cuo2l3a5dgk1c" path="res://icon.svg" id="1_rexis"]
+[ext_resource type="PackedScene" uid="uid://ba5uunmo4s0dv" path="res://scenes/objects/Camera.tscn" id="3_edsog"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_u3fni"]
 radius = 1.0
@@ -10,7 +12,12 @@ albedo_texture = ExtResource("1_rexis")
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_e71cs"]
 
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_cjf36"]
+height = 1.7
+radius = 0.1
+
 [node name="Player" type="Node3D"]
+script = ExtResource("1_0u8ci")
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="."]
 
@@ -20,3 +27,16 @@ shape = SubResource("SphereShape3D_u3fni")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
 material_override = SubResource("StandardMaterial3D_jq8k4")
 mesh = SubResource("CapsuleMesh_e71cs")
+
+[node name="Camera" parent="CharacterBody3D/MeshInstance3D" instance=ExtResource("3_edsog")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+
+[node name="RotationHandler" type="Node3D" parent="CharacterBody3D"]
+
+[node name="Area3D" type="Area3D" parent="CharacterBody3D/RotationHandler"]
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D/RotationHandler/Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)
+shape = SubResource("CylinderShape3D_cjf36")

@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://ba5uunmo4s0dv"]
+
+[node name="Camera" type="Node3D"]
+
+[node name="Twist" type="Node3D" parent="."]
+
+[node name="Pitch" type="Node3D" parent="Twist"]
+
+[node name="Camera3D" type="Camera3D" parent="Twist/Pitch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.75)
+
+[node name="TwistClone" type="Node3D" parent="Twist"]
