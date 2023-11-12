@@ -7,8 +7,18 @@ public partial class tsopits : playerbehaviours
 		CBodyVelocityCopy = CharacterBody.Velocity;
 		if (PlayerState == PlayerStates.Flying)
 		{
-			GD.Print(CBodyVelocityCopy.Y);
-			CharacterBody.Velocity = new Vector3(CBodyVelocityCopy.X, CBodyVelocityCopy.Y - (GravityMagnitude * (float)delta), CBodyVelocityCopy.Z);
+			if (CharacterBody.IsOnFloor())
+			{
+				PlayerState = PlayerStates.Grounded;
+			}
+			else
+			{
+				CharacterBody.Velocity = new Vector3(CBodyVelocityCopy.X, CBodyVelocityCopy.Y - (GravityMagnitude * (float)delta), CBodyVelocityCopy.Z);
+			}
+		}
+		if (PlayerState == PlayerStates.Grounded)
+		{
+			ground_movement(delta);
 		}
 		CharacterBody.MoveAndSlide();
 	}

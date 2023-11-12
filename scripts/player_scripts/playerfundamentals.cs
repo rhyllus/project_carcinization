@@ -4,7 +4,7 @@ public partial class playerfundamentals : Node3D
 {	
 	public int GravityMagnitude = (int)ProjectSettings.GetSetting("physics/3d/default_gravity");
 	[Export]
-	public float Speed = 50.0f;
+	public float Speed = 5000.0f;
 	[Export]
 	public float Acceleration = 50.0f; 
 	[Export]
