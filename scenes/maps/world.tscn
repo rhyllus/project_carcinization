@@ -47,14 +47,15 @@ mesh = SubResource("PlaneMesh_mlb14")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="WorldPlane/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_iceot")
 
-[node name="Donut" type="MeshInstance3D" parent="."]
+[node name="Donut" type="MeshInstance3D" parent="WorldPlane"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1.5, 0, 2.85887, 0)
 mesh = SubResource("TorusMesh_pjskb")
+skeleton = NodePath("../..")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="Donut"]
+[node name="StaticBody3D" type="StaticBody3D" parent="WorldPlane/Donut"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Donut/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WorldPlane/Donut/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_kyutj")
 
 [node name="Player" parent="." instance=ExtResource("1_nk5bg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.547, 1, 13.279)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.547, 11.3689, 13.279)
